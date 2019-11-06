@@ -26,8 +26,6 @@
       </div>
     </a>
     <a class="item">
-      <!-- <i class="green chevron circle right icon"></i>
-      <span><i class="green money check icon"></i>KMS balance inquiry</span> -->
       <div class="ui accordion">
         <div class="title">
           <i class="green money check icon"></i>KMS balance inquiry<i class="blue spinner loading icon"></i>
@@ -65,7 +63,9 @@
       >
         <input
           type="checkbox"
-          name="enableUpload"
+          name="is_uploadable"
+          v-model="is_uploadable"
+          @change="switchUploadData"
         >
         <label></label>
       </div>
@@ -74,17 +74,40 @@
 </template>
 
 <script>
+
 export default {
   data () {
     return {
-      enableUpload: true
+      is_uploadable: true
     }
   },
-  mounted () {
-    $('.ui.accordion')
-      .accordion()
-      ;
+  async mounted () {
+    // apply accordion for menu item
+    $('.ui.accordion').accordion();
 
+    // get [Set to upload data enable switch]
+    let storage_data = await this.getStorageData(['is_uploadable']);
+    if (storage_data.is_uploadable === false) {
+      this.is_uploadable = false;
+    }
+
+  },
+  methods: {
+    async switchUploadData () {
+      await this.setStorageData({ is_uploadable: this.is_uploadable });
+
+      //stop/resume tracking user for all opened tabs
+      chrome.tabs.query({}, function (tabs) {
+        tabs.forEach(tb => {
+
+          //igrone list of Chrome URLs
+          if (!tb.url.startsWith("chrome://")) {
+            chrome.tabs.executeScript(tb.id,
+              { file: "js/opt_inout.js" });
+          }
+        });
+      });
+    }
   }
 }
 </script>

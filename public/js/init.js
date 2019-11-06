@@ -1,33 +1,44 @@
 //set device id/address
-chrome.storage.sync.get('address', function (data) { //获得storage的数据，然后存储
-    console.log("get address" + data.address);
+chrome.storage.sync.get(['device_id', 'is_uploadable'], function (data) { //获得storage的数据，然后存储
 
-    Countly.init({
-        debug: false,
-        //provide your app key that you retrieved from Countly dashboard
+    if (chrome.runtime.lastError) {
+        console.log(chrome.runtime.lastError);
+        return Error(chrome.runtime.lastError.message);
+    };
+
+    console.log("get device id : " + data.device_id);
+
+    let config = {
+        debug: true,
+        //provide your app key
         app_key: "a58efc48ebb1e7b234d7338d3fd01ed1adc411e9",
-        //provide your server IP or name. Use try.count.ly for EE trial server.
-        //if you use your own server, make sure you have https enabled if you use
-        //https below.
+        //provide your server IP or name
         url: "https://data.zhenpin.info"
-    });
+    };
 
-    console.log(Countly.device_id);
+    if (data.device_id) {
+        config.device_id = data.device_id;
+    }
 
+    if (data.is_uploadable === false) {
+        console.log("ignore this current visitor");
+        config.ignore_visitor = true;
+    }
+
+    console.log("config info : ");
+    console.log(config);
+
+    Countly.init(config);
+
+    if (!data.device_id) {
+
+        chrome.storage.sync.set({ device_id: Countly.device_id, is_uploadable: true }, function () {
+            console.log("set device id : " + Countly.device_id);
+        });
+    }
 
     //track sessions automatically
     Countly.track_sessions();
     //track pageviews automatically
     Countly.track_pageview();
-
-    if (data.address == null) { // 等同于 a === undefined || a === null,不设置device id
-        console.log("为null");
-    }
-    else {
-        //Countly.device_id = data.address;
-    }
-
-    console.log(Countly.device_id);
-
-
 });
