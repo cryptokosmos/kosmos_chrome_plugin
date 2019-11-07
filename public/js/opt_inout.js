@@ -6,11 +6,11 @@ chrome.storage.sync.get(['is_uploadable'], function (data) {
 
   if (data.is_uploadable === false) {
     //to stop tracking user data call
-    console.log("stop tracking user data call");
+    console.log("stop tracking user");
     Countly.opt_out();
   } else {
     //to resume tracking user data call
-    console.log("resume tracking user data call");
+    console.log("resume tracking user");
     Countly.opt_in();
   }
 

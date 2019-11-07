@@ -98,11 +98,9 @@ export default {
     }
   },
   async created () {
-    console.log('created HOME');
     let { device_id } = await this.getStorageData(['device_id']);
 
     if (!device_id) {
-      console.log("go get started");
       this.$router.push({ path: "get-started" });
     }
   },
@@ -141,6 +139,7 @@ export default {
       }
     },
     async cancelEditETHAddress () {
+      // cancel editing, reload data from chrome storage
       let { device_id } = await this.getStorageData(['device_id']);
       this.device_id = device_id;
       this.is_address_readonly = true;

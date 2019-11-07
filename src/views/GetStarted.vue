@@ -65,10 +65,8 @@ export default {
   },
   methods: {
     async submit () {
-      await this.setStorageData({ device_id: this.device_id, is_consent_agree: this.is_consent_agree });
-      if (this.is_consent_agree) {
-        this.executeScriptEveryTabs({ file: "js/init.js" });
-      }
+      await this.setStorageData({ device_id: this.device_id, is_consent_agree: this.is_consent_agree, exclustion_urls: "" });
+      this.executeScriptEveryTabs({ file: "js/init.js" });
       this.$router.push({ path: "/" });
     }
   },

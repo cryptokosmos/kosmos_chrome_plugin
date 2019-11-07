@@ -1,12 +1,29 @@
+function isWildcardMatch (str, rule) { // convert wildcard to regex
+    // for this solution to work on any string, no matter what characters it has
+    let escapeRegex = (str) => str.replace(/([.*+?^=!:${}()|\[\]\/\\])/g, "\\$1");
+
+    // "."  => Find a single character, except newline or line terminator
+    // ".*" => Matches any string that contains zero or more characters
+    rule = rule.split("*").map(escapeRegex).join(".*");
+
+    // "^"  => Matches any string with the following at the beginning of it
+    // "$"  => Matches any string with that in front at the end of it
+    rule = "^" + rule + "$"
+
+    //Create a regular expression object for matching string
+    let regex = new RegExp(rule);
+
+    //Returns true if it finds a match, otherwise it returns false
+    return regex.test(str);
+};
+
 //set device id/address
-chrome.storage.sync.get(['device_id', 'is_uploadable', 'is_consent_agree'], function (data) { //获得storage的数据，然后存储
+chrome.storage.sync.get(['device_id', 'is_uploadable', 'is_consent_agree', 'exclustion_urls'], function (data) { //获得storage的数据，然后存储
 
     if (chrome.runtime.lastError) {
         console.log(chrome.runtime.lastError);
         return Error(chrome.runtime.lastError.message);
     };
-
-    console.log(data);
 
     // If already pass [get started] page
     if (data.device_id) {
@@ -27,32 +44,27 @@ chrome.storage.sync.get(['device_id', 'is_uploadable', 'is_consent_agree'], func
             all: ["sessions", "events", "views", "scrolls", "clicks", "forms", "crashes", "attribution", "users"]
         });
 
+        // check if exclustion urls
+        const rules = data.exclustion_urls.split('\n');
+        const tab_url = window.location.href.replace(/^https?:\/\//, '');
+
+        for (let i = 0; i < rules.length; i++) {
+            if (isWildcardMatch(tab_url, rules[i])) {
+                // disable upload data if it is exclustion url
+                config.ignore_visitor = true;
+            }
+        }
+
+        // disable upload data
         if (data.is_uploadable === false) {
-            console.log("ignore this current visitor");
             config.ignore_visitor = true;
         }
 
-        console.log("is consent agree : " + data.is_consent_agree);
-
         if (data.is_consent_agree === true) {
-            console.log("allow GDRP");
-
             Countly.add_consent("all");
-        } else {
-            console.log("stop tracking");
         }
-
-        console.log("config info : ");
-        console.log(config);
 
         Countly.init(config);
-
-        if (!data.device_id) {
-
-            chrome.storage.sync.set({ device_id: Countly.device_id, is_uploadable: true }, function () {
-                console.log("set device id : " + Countly.device_id);
-            });
-        }
 
         //track sessions automatically
         Countly.track_sessions();

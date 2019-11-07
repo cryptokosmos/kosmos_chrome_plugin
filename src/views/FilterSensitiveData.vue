@@ -46,11 +46,15 @@
         <label for="exclustionURLs">Add sensitive data</label>
         <div class="field">
           <label>Exclusion URLs</label>
-          <span class="ui small text">This dictate on which web pages KOSMOS plugin should be disabled. One entry per line. Invalid directives will be silently ignored and removed.
+          <span class="ui small text">This dictate on which web pages KOSMOS plugin should be disabled. One entry per line. Invalid wildcard(*) parttern will be silently ignored.
           </span>
           <textarea
             name="exclustionURLs"
-            placeholder="Please enter the URLs"
+            v-model="exclustion_urls"
+            placeholder="*google.com
+ *.facebook.com
+ *yahoo*
+ microsoft*"
           ></textarea>
         </div>
       </div>
@@ -74,31 +78,40 @@
 export default {
   data () {
     return {
-      is_consent_agree: false
+      is_consent_agree: false,
+      exclustion_urls: ""
     }
   },
   methods: {
     async submit () {
+
+      console.log(this.exclustion_urls);
+      // save data to chrome storage
+      await this.setStorageData({ is_consent_agree: this.is_consent_agree, exclustion_urls: this.exclustion_urls });
+
       let last_consent_status = document.querySelector("#is_consent_agree").checked;
 
       // if consent is changed
       if (this.is_consent_agree != last_consent_status) {
-        await this.setStorageData({ is_consent_agree: this.is_consent_agree });
-
         // if allow
         if (this.is_consent_agree) {
           this.executeScriptEveryTabs({ code: "Countly.add_consent('all');" });
         } else {
           this.executeScriptEveryTabs({ code: "Countly.remove_consent('all');" });
         }
-        this.$router.push({ path: "/" });
+
       }
+
+      // back to home screen
+      this.$router.push({ path: "/" });
+
     }
   },
   async created () {
-    // load is_consent_agree value from storage
-    let { is_consent_agree } = await this.getStorageData(['is_consent_agree']);
+    // load is_consent_agree, exclustion_urls from storage
+    let { is_consent_agree, exclustion_urls } = await this.getStorageData(['is_consent_agree', 'exclustion_urls']);
     this.is_consent_agree = is_consent_agree;
+    this.exclustion_urls = exclustion_urls;
 
     // keep original value for comparing when submit form
     document.querySelector("#is_consent_agree").checked = is_consent_agree;
