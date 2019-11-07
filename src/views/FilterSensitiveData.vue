@@ -43,7 +43,7 @@
         </div>
       </div>
       <div class="grouped fields">
-        <label for="exclustionURLs">Add sensitive data</label>
+        <label for="exclustionURLs"><i class="green filter icon"></i><span class="ui medium text">Add sensitive data</span></label>
         <div class="field">
           <label>Exclusion URLs</label>
           <span class="ui small text">This dictate on which web pages KOSMOS plugin should be disabled. One entry per line. Invalid wildcard(*) parttern will be silently ignored.

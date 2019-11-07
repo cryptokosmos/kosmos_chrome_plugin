@@ -9,7 +9,7 @@
 
     <div class="ui small form warning">
       <div class="required field">
-        <label>Ethereum address</label>
+        <label><i class="green ethereum icon"></i>Ethereum address</label>
         <textarea
           rows="2"
           v-model.trim="device_id"
