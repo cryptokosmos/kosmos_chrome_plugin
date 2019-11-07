@@ -9,10 +9,10 @@ Vue.mixin({
   methods: {
     getStorageData (key) {
       return new Promise((resolve, reject) =>
-        chrome.storage.sync.get(key, result =>
+        chrome.storage.sync.get(key, data =>
           chrome.runtime.lastError
             ? reject(Error(chrome.runtime.lastError.message))
-            : resolve(result)
+            : resolve(data)
         ))
     },
     setStorageData (data) {
@@ -24,6 +24,18 @@ Vue.mixin({
         )
       )
     },
+    executeScriptEveryTabs (script) {
+      chrome.tabs.query({}, function (tabs) {
+        tabs.forEach(tb => {
+
+          //igrone list of Chrome URLs
+          if (!tb.url.startsWith("chrome://")) {
+            chrome.tabs.executeScript(tb.id,
+              script);
+          }
+        });
+      });
+    }
 
   }
 });

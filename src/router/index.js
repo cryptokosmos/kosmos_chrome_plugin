@@ -3,6 +3,17 @@ import VueRouter from 'vue-router'
 
 Vue.use(VueRouter)
 
+function guard (to, from, next) {
+  if (store.state.user.role == 1) {
+    // or however you store your logged in state
+    next(); // allow to enter route
+  } else {
+    next('/'); // go to 'homepage';
+  }
+
+
+}
+
 const routes = [
   {
     path: '/',
@@ -14,7 +25,8 @@ const routes = [
     children: [
       { path: '', component: () => import('@/views/Home.vue') },
       { path: 'about', component: () => import('@/views/About.vue') },
-      { path: 'filter-data', component: () => import('@/views/FilterSensitiveData.vue') }
+      { path: 'filter-data', component: () => import('@/views/FilterSensitiveData.vue') },
+      { path: 'get-started', component: () => import('@/views/GetStarted.vue') }
     ]
   }
 ]
